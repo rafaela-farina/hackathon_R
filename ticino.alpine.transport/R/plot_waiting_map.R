@@ -75,8 +75,3 @@ demo_waiting <- data.frame(
   is_origin   = c(   TRUE,   FALSE,   FALSE,   FALSE,   FALSE)
 )
 
-# Run this to preview (point shp_path at a .shp from 2026_GEOM_TK):
-#   p <- plot_waiting_map(demo_waiting,
-#                         shp_path = "2026_GEOM_TK/.../cantons.shp",
-#                         region_name = "Ticino")
-#   print(p)
