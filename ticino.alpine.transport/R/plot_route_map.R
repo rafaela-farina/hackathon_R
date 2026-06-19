@@ -23,6 +23,21 @@ plot_route_map <- function(routes_all, shp_path,
                            region_name = "Region",
                            origin_name = NULL) {
 
+  stations <- read_csv_data()
+
+  stations$station_id <- as.character(stations$station_id)
+  routes_all$to <- as.character(routes_all$to)
+
+  routes_all <- routes_all |>
+    dplyr::left_join(
+      stations |>
+        dplyr::select(
+          to = station_id,
+          destination_name = station_name
+        ),
+      by = "to"
+    )
+
   # Read and reproject the base map
   ch <- sf::read_sf(shp_path)
   ch <- sf::st_transform(ch, 4326)
@@ -38,7 +53,7 @@ plot_route_map <- function(routes_all, shp_path,
     pts <- dest_routes$points[[1]]
     if (is.null(pts) || nrow(pts) == 0) next
 
-    pts$dest_id <- routes_all$to[i]
+    pts$dest_id <- routes_all$destination_name[i]
     pts$seq     <- seq_len(nrow(pts))
     segments[[length(segments) + 1]] <- pts
   }
@@ -77,8 +92,8 @@ plot_route_map <- function(routes_all, shp_path,
 
   p +
     ggplot2::coord_sf(
-      xlim = range(route_points$lon, na.rm = TRUE) + c(-0.2, 0.2),
-      ylim = range(route_points$lat, na.rm = TRUE) + c(-0.2, 0.2)
+      xlim = range(route_points$lon, na.rm = TRUE) + c(-0.1, 0.1),
+      ylim = range(route_points$lat, na.rm = TRUE) + c(-0.1, 0.1)
     ) +
     ggplot2::labs(
       title = paste("Public transport routes -", region_name),

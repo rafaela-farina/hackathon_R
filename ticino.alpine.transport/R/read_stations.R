@@ -1,86 +1,109 @@
-#' @title Compute waiting-time indicators
-#' @param connections A tidy data frame of parsed connections, one row per
-#'   connection, with at least these columns:
-#'   from_city, to_city, query_date, query_time, departure.
-#'   \code{query_time} is the requested time ("HH:MM") and \code{departure}
-#'   is the connection's departure timestamp (POSIXct or parseable string).
+#' @title Calculate waiting time by destination
+#' @param date Travel date in MM/DD/YYYY format.
+#' @param query_times Character vector of query times in HH:MM format.
+#' @param num Number of connections requested per destination.
 #' @description
-#' For each origin-destination-date-time query, computes the waiting time
-#' (in minutes) between the query time and each connection's departure,
-#' then keeps only the connection with the smallest non-negative waiting
-#' time. This is the per-query waiting-time indicator.
+#' For each query time, calculates the waiting time until the next available
+#' connection for every destination. Keeps the smallest non-negative waiting
+#' time per destination and query time, then summarises waiting times by
+#' destination.
 #'
-#' @returns A data frame with one row per query, adding a \code{wait_min}
-#'   column (waiting time in minutes).
+#' @returns A data frame with station data, median_wait, mean_wait,
+#'   and n_queries.
 #' @export
-compute_waiting <- function(connections) {
-  
-  df <- connections
-  
-  # Build full POSIXct timestamps for query and departure
-  df$query_ts     <- as.POSIXct(paste(df$query_date, df$query_time),
-                                format = "%Y-%m-%d %H:%M", tz = "UTC")
-  df$departure_ts <- as.POSIXct(df$departure, tz = "UTC")
-  
-  # Waiting time in minutes
-  df$wait_min <- as.numeric(
-    difftime(df$departure_ts, df$query_ts, units = "mins")
+calculate_waiting <- function(date, query_times, num = 3) {
+
+  stations <- read_csv_data()
+
+  stations$station_id <- as.character(stations$station_id)
+  stations$is_origin <- as.logical(stations$is_origin)
+
+  origin_id <- stations$station_id[stations$is_origin][1]
+
+  waiting <- purrr::map_dfr(
+    query_times,
+    function(query_time) {
+
+      routes_all <- get_routes_all(
+        from = origin_id,
+        date = date,
+        time = query_time,
+        num = num
+      )
+
+      query_date <- as.Date(date, format = "%m/%d/%Y")
+
+      query_ts <- as.POSIXct(
+        paste(query_date, query_time),
+        format = "%Y-%m-%d %H:%M",
+        tz = "Europe/Zurich"
+      )
+
+      purrr::map_dfr(
+        seq_len(nrow(routes_all)),
+        function(i) {
+
+          routes <- routes_all$routes[[i]]
+
+          if (is.null(routes) || nrow(routes) == 0) {
+            return(tibble::tibble())
+          }
+
+          departure_ts <- as.POSIXct(
+            routes$departure,
+            format = "%Y-%m-%d %H:%M:%S",
+            tz = "Europe/Zurich"
+          )
+
+          wait_min <- as.numeric(
+            difftime(
+              departure_ts,
+              query_ts,
+              units = "mins"
+            )
+          )
+
+          wait_min <- wait_min[
+            !is.na(wait_min) & wait_min >= 0
+          ]
+
+          if (length(wait_min) == 0) {
+            return(tibble::tibble())
+          }
+
+          tibble::tibble(
+            station_id = as.character(routes_all$to[i]),
+            query_time = query_time,
+            wait_min = min(wait_min)
+          )
+        }
+      )
+    }
   )
-  
-  # Keep only non-negative waits (connection hasn't left yet)
-  df <- df[!is.na(df$wait_min) & df$wait_min >= 0, ]
-  
-  # For each query (origin-destination-date-time), keep the smallest wait
-  df <- df[order(df$from_city, df$to_city, df$query_date,
-                 df$query_time, df$wait_min), ]
-  key <- paste(df$from_city, df$to_city, df$query_date, df$query_time)
-  df  <- df[!duplicated(key), ]
-  
-  return(df)
+
+  waiting_summary <- waiting |>
+    dplyr::group_by(station_id) |>
+    dplyr::summarise(
+      median_wait = median(wait_min),
+      mean_wait = mean(wait_min),
+      n_queries = dplyr::n(),
+      .groups = "drop"
+    )
+
+  result <- stations |>
+    dplyr::left_join(
+      waiting_summary,
+      by = "station_id"
+    )
+
+  result$median_wait[result$is_origin] <- 0
+  result$mean_wait[result$is_origin] <- 0
+  result$n_queries[result$is_origin] <- length(query_times)
+
+  return(result)
 }
-
-
-#' @title Summarise waiting time by destination
-#' @param waiting Output of \code{compute_waiting()}.
-#' @description
-#' Summarises the per-query waiting times into one row per destination,
-#' reporting the median (and mean) waiting time across query times.
-#'
-#' @returns A data frame with one row per destination city.
-#' @export
-summarise_waiting <- function(waiting) {
-  
-  agg <- aggregate(
-    wait_min ~ to_city,
-    data = waiting,
-    FUN = function(x) c(median = median(x), mean = mean(x), n = length(x))
-  )
-  
-  # aggregate() returns a matrix column; flatten it
-  out <- data.frame(
-    to_city     = agg$to_city,
-    median_wait = agg$wait_min[, "median"],
-    mean_wait   = agg$wait_min[, "mean"],
-    n_queries   = agg$wait_min[, "n"]
-  )
-  
-  return(out)
-}
-
-
-# --- Hardcoded demo data (remove once real parsed data is wired in) ----
-# Mimics the parsed connection table: several connections per query.
-demo_connections <- data.frame(
-  from_city  = "Bellinzona",
-  to_city    = c("Lugano","Lugano","Lugano",  "Locarno","Locarno",  "Mendrisio"),
-  query_date = "2026-06-19",
-  query_time = c("08:00","08:00","08:00",     "08:00","08:00",      "08:00"),
-  departure  = c("2026-06-19 08:12:00","2026-06-19 08:27:00","2026-06-19 08:42:00",
-                 "2026-06-19 08:18:00","2026-06-19 08:48:00",
-                 "2026-06-19 08:25:00"),
-  stringsAsFactors = FALSE
-)
-
-# Run this to preview:
-#   w <- compute_waiting(demo_connections)
-#   summarise_waiting(w)
+#waiting <- calculate_waiting(
+#  date = "06/22/2026",
+#  query_times = c("08:00", "10:00", "12:00", "14:00"),
+#  num = 3
+#)
