@@ -110,8 +110,8 @@ plot_waiting_map <- function(
   waiting_data$mean_wait[waiting_data$is_origin] <- 0
   waiting_data$n_queries[waiting_data$is_origin] <- length(query_times)
 
-  ch <- sf::read_sf(shp_path)
-  ch <- sf::st_transform(ch, 4326)
+  #ch <- sf::read_sf(shp_path)
+  #ch <- sf::st_transform(ch, 4326)
 
   origin <- waiting_data[waiting_data$is_origin, ]
   dests <- waiting_data[

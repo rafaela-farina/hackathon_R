@@ -39,8 +39,8 @@ plot_route_map <- function(routes_all, shp_path,
     )
 
   # Read and reproject the base map
-  ch <- sf::read_sf(shp_path)
-  ch <- sf::st_transform(ch, 4326)
+  #ch <- sf::read_sf(shp_path)
+  #ch <- sf::st_transform(ch, 4326)
 
   # Flatten the nested structure into one tidy table of points.
   # For each destination, take the first route and pull out its points.

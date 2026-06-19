@@ -107,3 +107,4 @@ calculate_waiting <- function(date, query_times, num = 3) {
 #  query_times = c("08:00", "10:00", "12:00", "14:00"),
 #  num = 3
 #)
+
