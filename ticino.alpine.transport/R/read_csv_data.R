@@ -1,16 +1,8 @@
-library(tidyverse)
-library(zoo)
-#library(devtools)
-library(roxygen2)
-library(testthat)
-library(knitr)
-
-#' @title TODO
-#' @param TODO
+#' @title Read saved CSV data
 #' @description
-#' TODO
+#' Returns the saved dataset included in the ticino.alpine.transport package.
 #'
-#' @returns TODO
+#' @return The saved dataset from ticino.alpine.transport.
 #' @export
 read_csv_data <- function() {
   return(ticino.alpine.transport::saved_data)

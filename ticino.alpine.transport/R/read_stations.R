@@ -82,10 +82,10 @@ calculate_waiting <- function(date, query_times, num = 3) {
   )
 
   waiting_summary <- waiting |>
-    dplyr::group_by(station_id) |>
+    dplyr::group_by(.data$station_id) |>
     dplyr::summarise(
-      median_wait = median(wait_min),
-      mean_wait = mean(wait_min),
+      median_wait = median(.data$wait_min),
+      mean_wait = mean(.data$wait_min),
       n_queries = dplyr::n(),
       .groups = "drop"
     )
@@ -107,4 +107,3 @@ calculate_waiting <- function(date, query_times, num = 3) {
 #  query_times = c("08:00", "10:00", "12:00", "14:00"),
 #  num = 3
 #)
-

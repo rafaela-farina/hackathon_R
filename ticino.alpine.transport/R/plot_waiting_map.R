@@ -1,20 +1,23 @@
 #' @title Calculate and plot regional waiting-time accessibility
+#'
 #' @param date Travel date in MM/DD/YYYY format.
 #' @param query_times Character vector of query times in HH:MM format.
 #' @param num Number of connections requested per destination.
+#'
 #' @description
 #' Calculates the next available connection waiting time for each destination
 #' and query time, summarises the waiting time by destination, and plots the
 #' result on a Swiss regional map.
 #'
-#' @returns A ggplot object.
+#' @return A ggplot object.
+#'
+#' @importFrom rlang .data
 #' @export
 plot_waiting_map <- function(
     date,
     query_times,
     num = 3
 ) {
-
   stations <- read_csv_data()
 
   stations$station_id <- as.character(stations$station_id)
@@ -25,7 +28,6 @@ plot_waiting_map <- function(
   waiting <- purrr::map_dfr(
     query_times,
     function(query_time) {
-
       routes_all <- get_routes_all(
         from = origin_id,
         date = date,
@@ -47,7 +49,6 @@ plot_waiting_map <- function(
       purrr::map_dfr(
         seq_len(nrow(routes_all)),
         function(i) {
-
           routes <- routes_all$routes[[i]]
 
           if (is.null(routes) || nrow(routes) == 0) {
@@ -90,7 +91,7 @@ plot_waiting_map <- function(
   waiting_summary <- waiting |>
     dplyr::group_by(.data$station_id) |>
     dplyr::summarise(
-      median_wait = median(.data$wait_min),
+      median_wait = stats::median(.data$wait_min),
       mean_wait = mean(.data$wait_min),
       n_queries = dplyr::n(),
       .groups = "drop"
@@ -106,16 +107,22 @@ plot_waiting_map <- function(
   waiting_data$mean_wait[waiting_data$is_origin] <- 0
   waiting_data$n_queries[waiting_data$is_origin] <- length(query_times)
 
-  origin <- waiting_data[waiting_data$is_origin, ]
+  origin <- waiting_data[
+    waiting_data$is_origin,
+    ,
+    drop = FALSE
+  ]
 
   dests <- waiting_data[
     !waiting_data$is_origin &
       !is.na(waiting_data$median_wait),
+    ,
+    drop = FALSE
   ]
 
   ggplot2::ggplot() +
     ggplot2::geom_sf(
-      data = ch,
+      data = .data$saved_plot,
       fill = "grey95",
       colour = "grey75",
       linewidth = 0.3
@@ -186,8 +193,10 @@ plot_waiting_map <- function(
     ) +
     ggplot2::theme_minimal()
 }
-#plot_waiting_map(
-#     date = "06/22/2026",
-#     query_times = c("08:00", "10:00", "12:00"),
-#     num = 3
-#)
+
+
+# plot_waiting_map(
+#   date = "06/22/2026",
+#   query_times = c("08:00", "10:00", "12:00"),
+#   num = 3
+# )

@@ -11,37 +11,38 @@ Authors@R: c(
     person(
       "Colin-Vadakkekudy", "Augustine",
       email = "colin.augustine@student.supsi.ch",
-      role = c("aut", "cre")
+      role = c("aut")
     ),
     person(
       "Sasha", "Bravo",
       email = "colin.augustine@student.supsi.ch",
-      role = c("aut", "cre")
+      role = c("aut")
     ),
     person(
       "Rafaela", "dos Santos Molina Farina",
       email = "rafaela.dossantos@student.supsi.ch",
-      role = c("aut", "cre")
+      role = c("aut")
     ),
     person(
       "Sasha", "Bravo",
       email = "colin.augustine@student.supsi.ch",
-      role = c("aut", "cre")
+      role = c("aut")
     ),
     person(
       "António Maria", "Padinha Mafra Falcão",
       email = "antonio.padinha@student.supsi.ch",
-      role = c("aut", "cre"),
+      role = c("aut")
+     ),
     person(
       "Artem", "Starodubtsev",
       email = "artem.starodubtsev@student.supsi.ch",
-      role = c("aut", "cre"),
+      role = c("aut")
     ),
     person(
       "Guus", "Van Hoorn",
       email = "guus.vanhoorn@student.supsi.ch",
-      role = c("aut", "cre"),
-    ),
+      role = c("aut")
+    )
   )
 Description: Downloads, caches, and analyzes public transport connection
     data for the Ticino region using the search.ch timetable API.
@@ -53,4 +54,17 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0)
+Imports:
+    rlang,
+    dplyr,
+    ggplot2,
+    httr,
+    lubridate,
+    purrr,
+    rlang,
+    stats,
+    tibble
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
+Depends: 
+    R (>= 4.5)

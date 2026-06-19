@@ -1,23 +1,38 @@
-library(lubridate)
-library(httr)
-library(purrr)
-library(dplyr)
-library(tibble)
-
 convert_time <- function(time) {
-  new_time <- as.POSIXct(time, format = "%H:%M") |>
-    ceiling_date("30 minutes") |>
+  new_time <- as.POSIXct(
+    time,
+    format = "%H:%M"
+  ) |>
+    lubridate::ceiling_date("30 minutes") |>
     format("%H:%M")
+
   return(new_time)
 }
 
 
-#' @title TODO
-#' @param TODO
-#' @description
-#' TODO
+#' @title Retrieve routes to all destinations
 #'
-#' @returns TODO
+#' @param from Character or numeric station identifier for the departure
+#'   station.
+#' @param date Character string specifying the travel date in the format
+#'   accepted by the search.ch timetable API.
+#' @param time Character string specifying the departure time in `"HH:MM"`
+#'   format. The time is rounded up to the next 30-minute interval.
+#' @param num Integer specifying the maximum number of connections to retrieve
+#'   for each destination. Defaults to 3.
+#'
+#' @description
+#' Retrieves public transport routes from one departure station to every other
+#' station in the saved dataset. Results are cached as RDS files to avoid
+#' repeated API requests for identical parameters.
+#'
+#' @return A tibble with one row per destination and the following columns:
+#' \itemize{
+#'   \item `from`: Departure station identifier.
+#'   \item `to`: Destination station identifier.
+#'   \item `routes`: A list-column containing route details and route points.
+#' }
+#'
 #' @export
 get_routes_all <- function(from, date, time, num = 3) {
   actual_time <- convert_time(time)
@@ -25,8 +40,10 @@ get_routes_all <- function(from, date, time, num = 3) {
   stations <- read_csv_data()
 
   destination_ids <- stations |>
-    dplyr::filter(as.character(station_id) != as.character(from)) |>
-    dplyr::pull(station_id) |>
+    dplyr::filter(
+      as.character(.data$station_id) != as.character(from)
+    ) |>
+    dplyr::pull(.data$station_id) |>
     as.character()
 
   clean_date <- gsub("/", "_", date)
@@ -42,7 +59,10 @@ get_routes_all <- function(from, date, time, num = 3) {
   )
 
   if (!dir.exists("cache")) {
-    dir.create("cache", recursive = TRUE)
+    dir.create(
+      "cache",
+      recursive = TRUE
+    )
   }
 
   if (file.exists(cache_filename)) {
@@ -51,7 +71,11 @@ get_routes_all <- function(from, date, time, num = 3) {
 
   to_params <- stats::setNames(
     as.list(destination_ids),
-    paste0("to[", seq_along(destination_ids) - 1, "]")
+    paste0(
+      "to[",
+      seq_along(destination_ids) - 1,
+      "]"
+    )
   )
 
   params <- c(
@@ -81,15 +105,12 @@ get_routes_all <- function(from, date, time, num = 3) {
   df_response <- purrr::imap_dfr(
     api_response$results,
     function(result, result_index) {
-
       routes <- purrr::imap_dfr(
         result$connections,
         function(route, route_index) {
-
           points <- purrr::imap_dfr(
             route$legs,
             function(leg, leg_index) {
-
               start_point <- if (leg_index == 1) {
                 tibble::tibble(
                   name = leg$name,
@@ -143,8 +164,8 @@ get_routes_all <- function(from, date, time, num = 3) {
             }
           ) |>
             dplyr::filter(
-              !is.na(lon),
-              !is.na(lat)
+              !is.na(.data$lon),
+              !is.na(.data$lat)
             ) |>
             dplyr::distinct()
 
@@ -170,7 +191,10 @@ get_routes_all <- function(from, date, time, num = 3) {
     }
   )
 
-  saveRDS(df_response, file = cache_filename)
+  saveRDS(
+    df_response,
+    file = cache_filename
+  )
 
   return(df_response)
 }

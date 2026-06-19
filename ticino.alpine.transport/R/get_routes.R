@@ -1,23 +1,37 @@
-library(lubridate)
-library(httr)
-library(purrr)
-library(dplyr)
-library(tibble)
-
 convert_time <- function(time) {
-  new_time <- as.POSIXct(time, format = "%H:%M") |>
-    ceiling_date("30 minutes") |>
+  new_time <- as.POSIXct(
+    time,
+    format = "%H:%M"
+  ) |>
+    lubridate::ceiling_date("30 minutes") |>
     format("%H:%M")
+
   return(new_time)
 }
 
 
-#' @title TODO
-#' @param TODO
-#' @description
-#' TODO
+#' @title Retrieve Routes
 #'
-#' @returns TODO
+#' @param from Character or numeric station identifier for the departure
+#'   station.
+#' @param to Character or numeric station identifier for the destination
+#'   station.
+#' @param date Character string specifying the travel date in the format
+#'   accepted by the search.ch timetable API.
+#' @param time Character string specifying the departure time in `"HH:MM"`
+#'   format. The time is rounded up to the next 30-minute interval.
+#' @param num Integer specifying the maximum number of connections to retrieve.
+#'   Defaults to 5.
+#'
+#' @description
+#' Retrieves public transport routes between the specified departure and
+#' destination stations. Results are cached as RDS files to avoid repeated API
+#' requests for identical parameters.
+#'
+#' @return A tibble containing the retrieved routes. The `points` column is a
+#'   list-column containing the geographic points belonging to each route.
+#'
+#' @importFrom dplyr filter
 #' @export
 get_routes <- function(from, to, date, time, num = 5) {
   actual_time <- convert_time(time)
@@ -36,7 +50,10 @@ get_routes <- function(from, to, date, time, num = 5) {
   )
 
   if (!dir.exists("cache")) {
-    dir.create("cache", recursive = TRUE)
+    dir.create(
+      "cache",
+      recursive = TRUE
+    )
   }
 
   if (file.exists(cache_filename)) {
@@ -67,11 +84,9 @@ get_routes <- function(from, to, date, time, num = 5) {
   df_response <- purrr::imap_dfr(
     api_response$connections,
     function(route, route_index) {
-
       points <- purrr::imap_dfr(
         route$legs,
         function(leg, leg_index) {
-
           start_point <- if (leg_index == 1) {
             tibble::tibble(
               name = leg$name,
@@ -125,8 +140,8 @@ get_routes <- function(from, to, date, time, num = 5) {
         }
       ) |>
         dplyr::filter(
-          !is.na(lon),
-          !is.na(lat)
+          !is.na(.data$lon),
+          !is.na(.data$lat)
         ) |>
         dplyr::distinct()
 
@@ -144,7 +159,10 @@ get_routes <- function(from, to, date, time, num = 5) {
     }
   )
 
-  saveRDS(df_response, file = cache_filename)
+  saveRDS(
+    df_response,
+    file = cache_filename
+  )
 
   return(df_response)
 }

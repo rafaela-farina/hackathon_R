@@ -1,14 +1,15 @@
 ---
-title: "Group_last"
-date: "`r Sys.Date()`"
+title: "Ticino Alpine Transport Accessibility Report"
+author: "group 4"
+date: "19/06/2026"
 output:
   html_document:
     toc: true
     toc_float: true
     theme: flatly
     code_folding: show
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 
@@ -18,117 +19,125 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 ```{r libraries}
 library(tidyverse)
-library(zoo)
-#library(devtools)
-library(roxygen2)
-library(testthat)
+library(sf)
 library(knitr)
 ```
 
-```{r}
+# Overview
 
-#read_station_data <- function(path = "data/SwissCities.csv") {
-#  swiss_df <- read.csv(path, fileEncoding = "UTF-8")
- # swiss_df <- unique(swiss_df)
-#  return(swiss_df)
-#}
-#swiss_df <- read_station_data()
+This report describes the transport accessibility work completed for our
+Ticino region. The project is organised as an R package. The files in
+the package read station data, query public transport routes, cache API
+results, calculate waiting times, and visualise the results on a regional map.
 
+The work done in the project follows this process:
+
+1. Store the cleaned station table in `data/saved_data.rda`.
+2. Store the map geometry in `data/ch.rda`.
+3. Read station data with `read_csv_data()`.
+4. Query routes with `get_routes()` and `get_routes_all()`.
+5. Reuse saved API responses from the `cache/` folder.
+6. Calculate waiting-time indicators with `calculate_waiting()`.
+7. Plot waiting-time and route maps with the plotting functions.
+
+# Station Data
+
+The station data is stored in `data/saved_data.rda` as `saved_data`. The
+package function `read_csv_data()` returns this object.
+
+```{r station-data}
+stations <- read_csv_data()
+stations$station_id <- as.character(stations$station_id)
+stations$is_origin <- as.logical(stations$is_origin)
+
+kable(
+  stations,
+  caption = "Station data used for our Ticino / Alpine region"
+)
 ```
 
-```{r}
-read_station_data <- function(path = "data/SwissCities.csv") {
-  swiss_df <- read.csv(path)
-  
-  swiss_df$city <- gsub("G<c3><b6>schenen", "Göschenen", swiss_df$city)
-  
-  swiss_df <- unique(swiss_df)
-  
-  return(swiss_df)
-}
-swiss_df <- read_station_data()
-```
+The dataset contains `r nrow(stations)` stations. One station is marked as the
+origin and the remaining stations are destinations.
 
-```{r}
-names(swiss_df) <- tolower(names(swiss_df))
-names(swiss_df) <- gsub(" ", "_", names(swiss_df))
+```{r origin-destination-summary}
+origin <- stations[stations$is_origin, ]
+destinations <- stations[!stations$is_origin, ]
 
-# remove duplicated rows
-swiss_df <- unique(swiss_df)
-
-# Convert numeric columns
-if ("latitude" %in% names(swiss_df)) {
-  swiss_df$latitude <- as.numeric(swiss_df$latitude)
-}
-
-if ("longitude" %in% names(swiss_df)) {
-  swiss_df$longitude <- as.numeric(swiss_df$longitude)
-}
-
-if ("population" %in% names(swiss_df)) {
-  swiss_df$population <- as.numeric(swiss_df$population)
-}
-swiss_df <- swiss_df[rowSums(is.na(swiss_df) | swiss_df == "") < ncol(swiss_df), ]
-
-
-# show data
-head(swiss_df)
-```
-
-```{r}
-#' Build route query table
-#'
-#' Creates a table with all origin-destination-date-time combinations.
-#'
-#' @param station_data Data frame returned by read_station_data().
-#' @param group_id_value Group ID to filter, for example 4.
-#' @param query_date Selected query date.
-#' @param query_times Selected query times.
-#'
-#' @return A data frame with route queries.
-#' @export
-build_route_query_table <- function(station_data,
-                                    group_id_value = 4,
-                                    query_date = "2025-06-20",
-                                    query_times = c("07:30", "09:00", "12:00", "17:00", "19:00")) {
-  
-  group_data <- station_data[station_data$group_id == group_id_value, ]
-  
-  origin <- group_data[group_data$is_origin == TRUE, ]
-  destinations <- group_data[group_data$is_origin == FALSE, ]
-  
-  query_table <- data.frame(
-    group_id = destinations$group_id,
-    region = destinations$region,
-    from_city = origin$city,
-    to_city = destinations$city,
-    from_station_id = origin$station_id,
-    to_station_id = destinations$station_id
-  )
-  
-  query_table <- merge(
-    query_table,
-    data.frame(query_date = query_date, query_time = query_times)
-  )
-  
-  return(query_table)
-}
-
-```
-
-```{r}
-
-
-query_table <- build_route_query_table(
-  station_data = swiss_df,
-  group_id_value = 4,
-  query_date = "2025-06-20",
-  query_times = c("07:30", "09:00", "12:00", "17:00", "19:00")
+kable(
+  origin[, c("city", "station_name", "station_id", "latitude", "longitude")],
+  caption = "Origin station"
 )
 
-query_table
+kable(
+  destinations[, c("city", "station_name", "station_id", "population")],
+  caption = "Destination stations"
+)
 ```
 
-```{origin_station <-swiss_df %>%}
-  filter("region")
+
+# Waiting-Time Calculation
+
+The function `calculate_waiting()` in `R/read_stations.R` calculates waiting
+times by:
+
+1. Reading the station data.
+2. Finding the origin station.
+3. Calling `get_routes_all()` for each query time.
+4. Comparing each requested time with the available departure times.
+5. Keeping the smallest non-negative wait for each destination and query time.
+6. Summarising the results with median waiting time, mean waiting time, and
+   number of queries.
+
+The available cache files match the query date `06/20/2026` and the query
+times `08:00`, `10:00`, `12:00`, and `14:00`, so the calculation below uses
+the saved route results.
+
+```{r waiting-calculation}
+waiting <- calculate_waiting(
+  date = "06/20/2026",
+  query_times = c("08:00", "10:00", "12:00"),
+  num = 3
+)
+
+kable(
+  waiting[, c("city", "station_name", "population", "median_wait", "mean_wait", "n_queries")],
+  caption = "Waiting-time indicators calculated by calculate_waiting()"
+)
+```
+
+# Waiting-Time Map
+
+The waiting-time map is produced by `plot_waiting_map()`. 
+
+In the plot:
+- the black star is the origin;
+- point size represents population;
+- point colour represents median waiting time in minutes.
+
+```{r waiting-map, fig.width=8, fig.height=6}
+plot_waiting_map(
+     date = "06/22/2026",
+     query_times = c("08:00", "10:00", "12:00"),
+     num = 3
+)
+```
+
+# Route Map
+
+This file contains one route from the origin station to each destination for
+the 17:30 query time. The function `plot_route_map()` reads the nested route
+points and draws route lines on the same `ch` map geometry.
+
+```{r route-map, fig.width=8, fig.height=6}
+plot_route_map(8505204, "06/22/2026", "6:56")
+```
+
+# Single-Route Plot
+
+The file `R/plot_route.R` contains `plot_route()`, which plots one selected
+route. The example below uses the first destination route from the cached
+17:30 all-destination result.
+
+```{r single-route-map, fig.width=8, fig.height=6}
+plot_route(8505400, 8505300, "06/22/2026", "10:56", 3)
 ```

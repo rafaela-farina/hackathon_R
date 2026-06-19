@@ -1,24 +1,29 @@
 #' @title Plot a regional route map
+#'
 #' @param from Origin station ID.
 #' @param date Travel date in MM/DD/YYYY format.
 #' @param time Travel time in HH:MM format.
 #' @param num Number of routes requested per destination.
+#'
 #' @description
 #' Gets routes from the origin station to all stations in the region and
 #' plots the first route for each destination.
 #'
-#' @returns A ggplot object.
-#' @export
+#' @return A ggplot object.
 #'
 #' @importFrom rlang .data
+#' @export
 plot_route_map <- function(from, date, time, num = 3) {
-
   stations <- read_csv_data()
 
   stations$station_id <- as.character(stations$station_id)
   from <- as.character(from)
 
-  origin <- stations[stations$station_id == from, ]
+  origin <- stations[
+    stations$station_id == from,
+    ,
+    drop = FALSE
+  ]
 
   if (nrow(origin) == 0) {
     stop("Origin station ID was not found")
@@ -75,7 +80,7 @@ plot_route_map <- function(from, date, time, num = 3) {
 
   p <- ggplot2::ggplot() +
     ggplot2::geom_sf(
-      data = ch,
+      data = saved_plot,
       fill = "grey95",
       colour = "grey75",
       linewidth = 0.3
@@ -123,11 +128,20 @@ plot_route_map <- function(from, date, time, num = 3) {
 
   p +
     ggplot2::coord_sf(
-      xlim = range(route_points$lon, na.rm = TRUE) + c(-0.1, 0.1),
-      ylim = range(route_points$lat, na.rm = TRUE) + c(-0.1, 0.1)
+      xlim = range(
+        route_points$lon,
+        na.rm = TRUE
+      ) + c(-0.1, 0.1),
+      ylim = range(
+        route_points$lat,
+        na.rm = TRUE
+      ) + c(-0.1, 0.1)
     ) +
     ggplot2::labs(
-      title = paste("Public transport routes -", region_name),
+      title = paste(
+        "Public transport routes -",
+        region_name
+      ),
       colour = "Destination",
       x = NULL,
       y = NULL
