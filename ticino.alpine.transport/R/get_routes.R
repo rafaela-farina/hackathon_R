@@ -20,33 +20,24 @@ convert_time <- function(time) {
 #' @returns TODO
 #' @export
 get_routes <- function(from, to, date, time, num = 5) {
-  actual_time = convert_time(time)
+  actual_time <- convert_time(time)
 
   clean_date <- gsub("/", "_", date)
   clean_time <- gsub(":", "_", actual_time)
 
-  cache_dir <- tools::R_user_dir(
-    "ticino.alpine.transport",
-    which = "cache"
+  cache_filename <- paste0(
+    "cache/",
+    from, "_",
+    to, "_",
+    clean_date, "_",
+    clean_time, "_",
+    num,
+    ".rds"
   )
 
-  dir.create(
-    cache_dir,
-    recursive = TRUE,
-    showWarnings = FALSE
-  )
-
-  cache_filename <- file.path(
-    cache_dir,
-    paste0(
-      from, "_",
-      to, "_",
-      clean_date, "_",
-      clean_time, "_",
-      num,
-      ".rds"
-    )
-  )
+  if (!dir.exists("cache")) {
+    dir.create("cache", recursive = TRUE)
+  }
 
   if (file.exists(cache_filename)) {
     return(readRDS(cache_filename))
@@ -60,21 +51,100 @@ get_routes <- function(from, to, date, time, num = 5) {
     num = num
   )
 
-  response <- GET("https://search.ch/timetable/api/route.json", query = params)
+  response <- httr::GET(
+    "https://search.ch/timetable/api/route.json",
+    query = params
+  )
 
-  stop_for_status(response)
+  httr::stop_for_status(response)
 
-  api_response <- content(response, as = "parsed", type = "application/json")
+  api_response <- httr::content(
+    response,
+    as = "parsed",
+    type = "application/json"
+  )
 
-  df_response <- map_dfr(
+  df_response <- purrr::imap_dfr(
     api_response$connections,
-    function(route) {
-      route$legs <- NULL
-      as_tibble(route)
+    function(route, route_index) {
+
+      points <- purrr::imap_dfr(
+        route$legs,
+        function(leg, leg_index) {
+
+          start_point <- if (leg_index == 1) {
+            tibble::tibble(
+              name = leg$name,
+              arrival_time = leg$departure,
+              lon = leg$lon,
+              lat = leg$lat
+            )
+          } else {
+            tibble::tibble()
+          }
+
+          stop_points <- if (
+            !is.null(leg$stops) &&
+            length(leg$stops) > 0
+          ) {
+            purrr::map_dfr(
+              leg$stops,
+              function(stop) {
+                tibble::tibble(
+                  name = stop$name,
+                  arrival_time = if (!is.null(stop$arrival)) {
+                    stop$arrival
+                  } else {
+                    NA_character_
+                  },
+                  lon = stop$lon,
+                  lat = stop$lat
+                )
+              }
+            )
+          } else {
+            tibble::tibble()
+          }
+
+          exit_point <- if (!is.null(leg$exit)) {
+            tibble::tibble(
+              name = leg$exit$name,
+              arrival_time = leg$exit$arrival,
+              lon = leg$exit$lon,
+              lat = leg$exit$lat
+            )
+          } else {
+            tibble::tibble()
+          }
+
+          dplyr::bind_rows(
+            start_point,
+            stop_points,
+            exit_point
+          )
+        }
+      ) |>
+        dplyr::filter(
+          !is.na(lon),
+          !is.na(lat)
+        ) |>
+        dplyr::distinct()
+
+      tibble::tibble(
+        route_id = paste0("route", route_index),
+        duration = route$duration,
+        from = route$from,
+        departure = route$departure,
+        to = route$to,
+        arrival = route$arrival,
+        is_main = route$is_main,
+        occupancy = route$occupancy,
+        points = list(points)
+      )
     }
   )
 
   saveRDS(df_response, file = cache_filename)
-  return(df_response)
 
+  return(df_response)
 }
