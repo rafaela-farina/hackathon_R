@@ -19,16 +19,34 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```{r libraries}
 library(tidyverse)
 library(zoo)
-library(devtools)
+#library(devtools)
 library(roxygen2)
 library(testthat)
 library(knitr)
 ```
 
 ```{r}
-swiss_df <- read.csv("data/SwissCities.csv" , stringsAsFactors = FALSE,fileEncoding = "UTF-8-BOM"
-)
-swiss_df
+
+#read_station_data <- function(path = "data/SwissCities.csv") {
+#  swiss_df <- read.csv(path, fileEncoding = "UTF-8")
+ # swiss_df <- unique(swiss_df)
+#  return(swiss_df)
+#}
+#swiss_df <- read_station_data()
+
+```
+
+```{r}
+read_station_data <- function(path = "data/SwissCities.csv") {
+  swiss_df <- read.csv(path)
+  
+  swiss_df$city <- gsub("G<c3><b6>schenen", "Göschenen", swiss_df$city)
+  
+  swiss_df <- unique(swiss_df)
+  
+  return(swiss_df)
+}
+swiss_df <- read_station_data()
 ```
 
 ```{r}
