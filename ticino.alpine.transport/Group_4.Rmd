@@ -12,3 +12,20 @@ editor_options:
     wrap: 72
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r libraries}
+library(tidyverse)
+library(zoo)
+library(devtools)
+library(roxygen2)
+library(testthat)
+library(knitr)
+```
+
+```{r}
+swiss_df <- read.csv("data/SwissCities.csv")
+swiss_df
+```
