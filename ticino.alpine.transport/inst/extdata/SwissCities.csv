@@ -1,0 +1,61 @@
+group_id,region,is_origin,city,station_name,station_id,canton,latitude,longitude,population
+1,Romandie / Valais,TRUE,Lausanne,Lausanne,8501120,VD,46.5197,6.6323,140202
+1,Romandie / Valais,FALSE,Geneva,Gen<c3><a8>ve,8501008,GE,46.2044,6.1432,203856
+1,Romandie / Valais,FALSE,Nyon,Nyon,8501030,VD,46.3832,6.2396,22200
+1,Romandie / Valais,FALSE,Morges,Morges,8501037,VD,46.5113,6.4985,16600
+1,Romandie / Valais,FALSE,Yverdon-les-Bains,Yverdon-les-Bains,8504200,VD,46.7785,6.6412,30200
+1,Romandie / Valais,FALSE,Fribourg,Fribourg/Freiburg,8504100,FR,46.8065,7.1619,38678
+1,Romandie / Valais,FALSE,Neuchatel,Neuchâtel,8504221,NE,46.9896,6.9293,33475
+1,Romandie / Valais,FALSE,Vevey,Vevey,8501200,VD,46.4628,6.8419,19900
+1,Romandie / Valais,FALSE,Montreux,Montreux,8501300,VD,46.4312,6.9106,26500
+1,Romandie / Valais,FALSE,Aigle,Aigle,8501400,VD,46.3181,6.9646,10200
+1,Romandie / Valais,FALSE,Sion,Sion,8501506,VS,46.2331,7.3606,34708
+1,Romandie / Valais,FALSE,Martigny,Martigny,8501500,VS,46.1028,7.0722,20500
+1,Romandie / Valais,FALSE,Bulle,Bulle,8504086,FR,46.617,7.0574,26000
+1,Romandie / Valais,FALSE,Payerne,Payerne,8504134,VD,46.8219,6.9382,10000
+1,Romandie / Valais,FALSE,Brig,Brig,8501609,VS,46.3167,7.9833,13000
+2,Bern / Mittelland / Northwest,TRUE,Bern,Bern,8507000,BE,46.948,7.4474,134290
+2,Bern / Mittelland / Northwest,FALSE,Thun,Thun,8507100,BE,46.7579,7.627,43850
+2,Bern / Mittelland / Northwest,FALSE,Interlaken,Interlaken Ost,8507492,BE,46.6863,7.8632,5600
+2,Bern / Mittelland / Northwest,FALSE,Biel/Bienne,Biel/Bienne,8504300,BE,47.1368,7.2468,55159
+2,Bern / Mittelland / Northwest,FALSE,Solothurn,Solothurn,8500207,SO,47.2088,7.5323,17000
+2,Bern / Mittelland / Northwest,FALSE,Olten,Olten,8500218,SO,47.3499,7.9033,19000
+2,Bern / Mittelland / Northwest,FALSE,Basel,Basel SBB,8500010,BS,47.5596,7.5886,177595
+2,Bern / Mittelland / Northwest,FALSE,Aarau,Aarau,8502113,AG,47.3904,8.0457,22000
+2,Bern / Mittelland / Northwest,FALSE,Del<c3><a9>mont,Delémont,8500109,JU,47.3649,7.3445,12500
+2,Bern / Mittelland / Northwest,FALSE,Langenthal,Langenthal,8508100,BE,47.2153,7.7966,16000
+2,Bern / Mittelland / Northwest,FALSE,Burgdorf,Burgdorf,8508005,BE,47.059,7.6279,16000
+2,Bern / Mittelland / Northwest,FALSE,Fribourg,Fribourg/Freiburg,8504100,FR,46.8065,7.1619,38678
+2,Bern / Mittelland / Northwest,FALSE,Neuchatel,Neuchâtel,8504221,NE,46.9896,6.9293,33475
+2,Bern / Mittelland / Northwest,FALSE,Liestal,Liestal,8500023,BL,47.4847,7.7344,14500
+2,Bern / Mittelland / Northwest,FALSE,Zofingen,Zofingen,8502001,AG,47.2888,7.9459,12000
+3,Zurich / Eastern Switzerland,TRUE,Zurich,Zürich HB,8503000,ZH,47.3769,8.5417,421878
+3,Zurich / Eastern Switzerland,FALSE,Winterthur,Winterthur,8506000,ZH,47.4999,8.7241,116418
+3,Zurich / Eastern Switzerland,FALSE,Schaffhausen,Schaffhausen,8503424,SH,47.6959,8.638,36868
+3,Zurich / Eastern Switzerland,FALSE,St. Gallen,St. Gallen,8506302,SG,47.4245,9.3767,76328
+3,Zurich / Eastern Switzerland,FALSE,Frauenfeld,Frauenfeld,8506100,TG,47.5582,8.8985,26000
+3,Zurich / Eastern Switzerland,FALSE,Wil,Wil SG,8506206,SG,47.4615,9.0455,24000
+3,Zurich / Eastern Switzerland,FALSE,Uster,Uster,8503125,ZH,47.348,8.719,35860
+3,Zurich / Eastern Switzerland,FALSE,Rapperswil-Jona,Rapperswil SG,8503110,SG,47.2267,8.8164,27000
+3,Zurich / Eastern Switzerland,FALSE,Zug,Zug,8502204,ZG,47.1662,8.5155,30934
+3,Zurich / Eastern Switzerland,FALSE,Chur,Chur,8509000,GR,46.8508,9.532,37103
+3,Zurich / Eastern Switzerland,FALSE,Baden,Baden,8503504,AG,47.4733,8.3059,20000
+3,Zurich / Eastern Switzerland,FALSE,Aarau,Aarau,8502113,AG,47.3904,8.0457,22000
+3,Zurich / Eastern Switzerland,FALSE,Sargans,Sargans,8509411,SG,47.05,9.441,6500
+3,Zurich / Eastern Switzerland,FALSE,W<c3><a4>denswil,Wädenswil,8503206,ZH,47.2293,8.6722,25000
+3,Zurich / Eastern Switzerland,FALSE,Pf<c3><a4>ffikon SZ,Pfäffikon SZ,8503209,SZ,47.201,8.7781,7300
+4,Ticino / Alpine region,TRUE,Bellinzona,Bellinzona,8505213,TI,46.1956,9.0238,43670
+4,Ticino / Alpine region,FALSE,Lugano,Lugano,8505300,TI,46.0037,8.9511,62315
+4,Ticino / Alpine region,FALSE,Locarno,Locarno,8505400,TI,46.169,8.7957,16075
+4,Ticino / Alpine region,FALSE,Mendrisio,Mendrisio,8505305,TI,45.8713,8.9841,15000
+4,Ticino / Alpine region,FALSE,Chiasso,Chiasso,8505307,TI,45.832,9.0312,7500
+4,Ticino / Alpine region,FALSE,Biasca,Biasca,8505209,TI,46.3597,8.9696,6200
+4,Ticino / Alpine region,FALSE,Faido,Faido,8505204,TI,46.477,8.801,2800
+4,Ticino / Alpine region,FALSE,Airolo,Airolo,8505201,TI,46.528,8.608,1500
+4,Ticino / Alpine region,FALSE,G<c3><b6>schenen,Göschenen,8505119,UR,46.6687,8.5889,500
+4,Ticino / Alpine region,FALSE,Andermatt,Andermatt,8505165,UR,46.6354,8.5939,1600
+4,Ticino / Alpine region,FALSE,Altdorf,Altdorf UR,8505113,UR,46.8804,8.6444,9500
+4,Ticino / Alpine region,FALSE,Luzern,Luzern,8505000,LU,47.0502,8.3093,82420
+4,Ticino / Alpine region,FALSE,Chur,Chur,8509000,GR,46.8508,9.532,37103
+4,Ticino / Alpine region,FALSE,St. Moritz,St. Moritz,8509253,GR,46.4983,9.839,4900
+4,Ticino / Alpine region,FALSE,Brig,Brig,8501609,VS,46.3167,7.9833,13000
