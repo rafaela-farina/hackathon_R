@@ -10,6 +10,7 @@
 #'
 #' @returns A data frame with station data, median_wait, mean_wait,
 #'   and n_queries.
+#' @importFrom rlang .data
 #' @export
 calculate_waiting <- function(date, query_times, num = 3) {
 
@@ -102,8 +103,3 @@ calculate_waiting <- function(date, query_times, num = 3) {
 
   return(result)
 }
-#waiting <- calculate_waiting(
-#  date = "06/22/2026",
-#  query_times = c("08:00", "10:00", "12:00", "14:00"),
-#  num = 3
-#)

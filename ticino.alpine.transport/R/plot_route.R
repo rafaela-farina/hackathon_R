@@ -69,7 +69,7 @@ plot_route <- function(
 
   p <- ggplot2::ggplot() +
     ggplot2::geom_sf(
-      ticino.alpine.transport::saved_plot,
+      data = ticino.alpine.transport::saved_plot,
       fill = "grey95",
       colour = "grey75",
       linewidth = 0.3
