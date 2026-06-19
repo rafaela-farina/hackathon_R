@@ -1,18 +1,56 @@
 Package: ticino.alpine.transport
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Swiss Public Transport Analysis for Ticino and Alpine Region
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Emmanuel", "Adoh",
+      email = "emmanuel.adoh@student.supsi.ch",
       role = c("aut", "cre")
-    )
+    ),
+    person(
+      "Colin-Vadakkekudy", "Augustine",
+      email = "colin.augustine@student.supsi.ch",
+      role = c("aut", "cre")
+    ),
+    person(
+      "Sasha", "Bravo",
+      email = "colin.augustine@student.supsi.ch",
+      role = c("aut", "cre")
+    ),
+    person(
+      "Rafaela", "dos Santos Molina Farina",
+      email = "rafaela.dossantos@student.supsi.ch",
+      role = c("aut", "cre")
+    ),
+    person(
+      "Sasha", "Bravo",
+      email = "colin.augustine@student.supsi.ch",
+      role = c("aut", "cre")
+    ),
+    person(
+      "António Maria", "Padinha Mafra Falcão",
+      email = "antonio.padinha@student.supsi.ch",
+      role = c("aut", "cre"),
+    person(
+      "Artem", "Starodubtsev",
+      email = "artem.starodubtsev@student.supsi.ch",
+      role = c("aut", "cre"),
+    ),
+    person(
+      "Guus", "Van Hoorn",
+      email = "guus.vanhoorn@student.supsi.ch",
+      role = c("aut", "cre"),
+    ),
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Description: Downloads, caches, and analyzes public transport connection
+    data for the Ticino region using the search.ch timetable API.
+    Computes waiting-time accessibility indicators between an origin
+    station and a set of destination cities, and produces waiting-time
+    accessibility maps.
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-Depends: 
-    R (>= 3.5)
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
