@@ -1,93 +1,124 @@
-#' @title Plot a regional route map with connecting lines
-#' @param routes_all Output of \code{get_routes_all()}: one row per
-#'   destination, with a nested \code{routes} list-column, each route
-#'   carrying a \code{points} list-column of stop coordinates
-#'   (name, lon, lat).
-#' @param shp_path Path to a Swiss boundary shapefile (.shp) from the
-#'   2026_GEOM_TK folder.
-#' @param region_name Name of the region, used in the plot title.
-#' @param origin_name Optional name of the origin station, highlighted
-#'   with a star if its coordinates appear in the data.
+#' @title Plot a regional route map
+#' @param from Origin station ID.
+#' @param date Travel date in MM/DD/YYYY format.
+#' @param time Travel time in HH:MM format.
+#' @param num Number of routes requested per destination.
 #' @description
-#' Draws simplified route lines from the assigned origin station to every
-#' destination, by connecting consecutive stops of the first (main) route
-#' with straight segments. The Swiss base map is read from the shapefile
-#' and transformed to longitude/latitude (EPSG:4326). Each destination's
-#' route is drawn in a different colour.
+#' Gets routes from the origin station to all stations in the region and
+#' plots the first route for each destination.
 #'
 #' @returns A ggplot object.
 #' @export
 #'
 #' @importFrom rlang .data
-plot_route_map <- function(routes_all, shp_path,
-                           region_name = "Region",
-                           origin_name = NULL) {
+plot_route_map <- function(from, date, time, num = 3) {
 
   stations <- read_csv_data()
 
   stations$station_id <- as.character(stations$station_id)
+  from <- as.character(from)
+
+  origin <- stations[stations$station_id == from, ]
+
+  if (nrow(origin) == 0) {
+    stop("Origin station ID was not found")
+  }
+
+  origin_name <- origin$station_name[1]
+  region_name <- origin$region[1]
+
+  routes_all <- get_routes_all(
+    from = from,
+    date = date,
+    time = time,
+    num = num
+  )
+
   routes_all$to <- as.character(routes_all$to)
 
   routes_all <- routes_all |>
     dplyr::left_join(
       stations |>
         dplyr::select(
-          to = station_id,
-          destination_name = station_name
+          to = .data$station_id,
+          destination_name = .data$station_name
         ),
       by = "to"
     )
 
-  # Read and reproject the base map
-  #ch <- sf::read_sf(shp_path)
-  #ch <- sf::st_transform(ch, 4326)
-
-  # Flatten the nested structure into one tidy table of points.
-  # For each destination, take the first route and pull out its points.
   segments <- list()
+
   for (i in seq_len(nrow(routes_all))) {
     dest_routes <- routes_all$routes[[i]]
-    if (is.null(dest_routes) || nrow(dest_routes) == 0) next
 
-    # take the first (main) route to keep the map simple
+    if (is.null(dest_routes) || nrow(dest_routes) == 0) {
+      next
+    }
+
     pts <- dest_routes$points[[1]]
-    if (is.null(pts) || nrow(pts) == 0) next
+
+    if (is.null(pts) || nrow(pts) == 0) {
+      next
+    }
 
     pts$dest_id <- routes_all$destination_name[i]
-    pts$seq     <- seq_len(nrow(pts))
+    pts$seq <- seq_len(nrow(pts))
+
     segments[[length(segments) + 1]] <- pts
   }
+
   route_points <- dplyr::bind_rows(segments)
 
-  # Build the plot
+  if (nrow(route_points) == 0) {
+    stop("No route points were found")
+  }
+
   p <- ggplot2::ggplot() +
-    ggplot2::geom_sf(data = ch, fill = "grey95", colour = "grey75",
-                     linewidth = 0.3) +
-    # route lines: one path per destination, ordered by stop sequence
+    ggplot2::geom_sf(
+      data = ch,
+      fill = "grey95",
+      colour = "grey75",
+      linewidth = 0.3
+    ) +
     ggplot2::geom_path(
       data = route_points,
-      ggplot2::aes(x = lon, y = lat,
-                   group = dest_id, colour = dest_id),
+      ggplot2::aes(
+        x = .data$lon,
+        y = .data$lat,
+        group = .data$dest_id,
+        colour = .data$dest_id
+      ),
       linewidth = 0.7
     ) +
-    # stop points along the routes
     ggplot2::geom_point(
       data = route_points,
-      ggplot2::aes(x = lon, y = lat, colour = dest_id),
+      ggplot2::aes(
+        x = .data$lon,
+        y = .data$lat,
+        colour = .data$dest_id
+      ),
       size = 1.2
     )
 
-  # Optionally highlight the origin with a star
-  if (!is.null(origin_name)) {
-    origin_pt <- route_points[route_points$name == origin_name, ][1, ]
-    if (!is.na(origin_pt$lon)) {
-      p <- p +
-        ggplot2::geom_point(
-          data = origin_pt,
-          ggplot2::aes(x = lon, y = lat),
-          shape = 8, size = 5, colour = "black", stroke = 1.2
-        )
-    }
+  origin_pt <- route_points[
+    route_points$name == origin_name,
+    ,
+    drop = FALSE
+  ]
+
+  if (nrow(origin_pt) > 0) {
+    p <- p +
+      ggplot2::geom_point(
+        data = origin_pt[1, , drop = FALSE],
+        ggplot2::aes(
+          x = .data$lon,
+          y = .data$lat
+        ),
+        shape = 8,
+        size = 5,
+        colour = "black",
+        stroke = 1.2
+      )
   }
 
   p +
@@ -97,7 +128,9 @@ plot_route_map <- function(routes_all, shp_path,
     ) +
     ggplot2::labs(
       title = paste("Public transport routes -", region_name),
-      colour = "Destination", x = NULL, y = NULL
+      colour = "Destination",
+      x = NULL,
+      y = NULL
     ) +
     ggplot2::theme_minimal()
 }

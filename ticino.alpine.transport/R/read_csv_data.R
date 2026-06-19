@@ -13,6 +13,6 @@ library(knitr)
 #' @returns TODO
 #' @export
 read_csv_data <- function() {
-  return(saved_data)
+  return(ticino.alpine.transport::saved_data)
 }
 

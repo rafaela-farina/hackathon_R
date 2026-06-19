@@ -1,8 +1,6 @@
 #' @title Calculate and plot regional waiting-time accessibility
 #' @param date Travel date in MM/DD/YYYY format.
 #' @param query_times Character vector of query times in HH:MM format.
-#' @param shp_path Path to a Swiss boundary shapefile.
-#' @param region_name Name of the region used in the plot title.
 #' @param num Number of connections requested per destination.
 #' @description
 #' Calculates the next available connection waiting time for each destination
@@ -14,8 +12,6 @@
 plot_waiting_map <- function(
     date,
     query_times,
-    shp_path,
-    region_name = "Region",
     num = 3
 ) {
 
@@ -110,10 +106,8 @@ plot_waiting_map <- function(
   waiting_data$mean_wait[waiting_data$is_origin] <- 0
   waiting_data$n_queries[waiting_data$is_origin] <- length(query_times)
 
-  #ch <- sf::read_sf(shp_path)
-  #ch <- sf::st_transform(ch, 4326)
-
   origin <- waiting_data[waiting_data$is_origin, ]
+
   dests <- waiting_data[
     !waiting_data$is_origin &
       !is.na(waiting_data$median_wait),
@@ -186,19 +180,14 @@ plot_waiting_map <- function(
       ) + c(-0.3, 0.3)
     ) +
     ggplot2::labs(
-      title = paste(
-        "Public transport waiting times -",
-        region_name
-      ),
+      title = "Public transport waiting times - Ticino / Alpine region",
       x = NULL,
       y = NULL
     ) +
     ggplot2::theme_minimal()
 }
 #plot_waiting_map(
-#  date = "06/22/2026",
-#  query_times = c("08:00", "10:00", "12:00"),
-#  shp_path = "data/2026_GEOM_TK/SHP/Boundaries_K4_Canton_20260101.shp",
-#  region_name = "Ticino / Alpine region",
-#  num = 3
+#     date = "06/22/2026",
+#     query_times = c("08:00", "10:00", "12:00"),
+#     num = 3
 #)

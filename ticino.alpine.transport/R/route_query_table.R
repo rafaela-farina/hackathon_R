@@ -11,7 +11,7 @@ route_query_table <- function(query_date = "2025-06-20",
   station_data <- read_csv_data()
   origin <- station_data[station_data$is_origin == TRUE, ]
   destinations <- station_data[station_data$is_origin == FALSE, ]
-  
+
   query_table <- data.frame(
     group_id = destinations$group_id,
     region = destinations$region,
@@ -20,15 +20,15 @@ route_query_table <- function(query_date = "2025-06-20",
     from_station_id = origin$station_id,
     to_station_id = destinations$station_id
   )
-  
+
   query_table <- merge(
     query_table,
     data.frame(query_date = query_date, query_time = query_times)
   )
-  
-  return(query_table.as_tibble())
+
+  return(query_table)
 }
 
 
-route_query_table()
-  
+#route_query_table()
+

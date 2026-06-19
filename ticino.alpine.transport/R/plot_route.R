@@ -104,19 +104,3 @@ plot_route <- function(routes, shp_path,
     ) +
     ggplot2::theme_minimal()
 }
-
-#routes <- get_routes(
-#  from = 8505300,
-#  to = 8505000,
-#  date = "06/20/2026",
-#  time = "12:17",
-#  num = 5
-#)
-
-#plot_route(
-#  routes = routes,
-#  shp_path = "data/2026_GEOM_TK/SHP/Boundaries_K4_Canton_20260101.shp",
-#  route_index = 1,
-#  route_name = "Lugano to Luzern",
-#  origin_name = "Lugano"
-#)
