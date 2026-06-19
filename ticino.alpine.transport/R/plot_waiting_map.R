@@ -64,14 +64,3 @@ plot_waiting_map <- function(waiting, shp_path, region_name = "Region") {
     ggplot2::theme_minimal()
 }
 
-
-# --- Hardcoded demo data (remove once real data is wired in) ----------
-demo_waiting <- data.frame(
-  city        = c("Bellinzona", "Lugano", "Locarno", "Mendrisio", "Biasca"),
-  latitude    = c(46.1956, 46.0037, 46.1670, 45.8696, 46.3590),
-  longitude   = c( 9.0238,  8.9511,  8.7943,  8.9810,  8.9710),
-  population  = c(  43670,   62000,   16000,   15500,    6100),
-  median_wait = c(      0,      12,      18,      25,      35),
-  is_origin   = c(   TRUE,   FALSE,   FALSE,   FALSE,   FALSE)
-)
-
